@@ -22,6 +22,8 @@ import time
 COMMANDS = ("status", "tools", "call", "snapshot", "chat", "history", "install", "doctor")
 
 
+# `name` is positional-only so a tool argument that is also called `name`
+# (document_new, create_layer, ...) lands in **args instead of clashing with it.
 def _run(name, /, **args):
     from .server import TOOLS, Image, ToolError
     if name not in TOOLS:
@@ -68,6 +70,7 @@ def call(args):
         kwargs = json.loads(args.args) if args.args else {}
     except ValueError as e:
         raise SystemExit("the arguments must be JSON, like '{\"width\": 800}': %s" % e)
+    # json.loads accepts '[1]' or '5'; only an object can be passed as keyword arguments
     if not isinstance(kwargs, dict):
         raise SystemExit("the arguments must be a JSON object, like '{\"width\": 800}'")
     data, images = _run(args.tool, **kwargs)
